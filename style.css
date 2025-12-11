@@ -59,9 +59,9 @@ header h1 {
 }
 
 /* Navigation / TOC */
+/* Navigation / TOC */
 .toc-card {
-    text-align: left;
-    /* .section class handles background, padding, shadow */
+    text-align: left !important;
 }
 
 .toc-header {
@@ -69,14 +69,18 @@ header h1 {
     margin-bottom: 15px;
     font-size: 1.2rem;
     color: #222;
+    text-align: left;
 }
 
 .toc-card ol {
-    list-style-position: inside;
-    padding: 0;
-    margin: 0;
     display: block;
     text-align: left;
+    margin: 0;
+    padding-left: 1.5rem;
+    /* Standard indentation */
+    list-style-position: outside;
+    /* Ensure proper alignment of numbers */
+    width: 100%;
 }
 
 .toc-card li {
@@ -84,14 +88,15 @@ header h1 {
     margin-bottom: 8px;
     color: #555;
     font-family: 'Inter', system-ui, sans-serif;
-    /* Explicitly ensure consistency */
+    text-align: left;
 }
 
 .toc-card a {
     text-decoration: none;
     color: var(--primary-color);
     font-weight: 500;
-    margin-left: 5px;
+    margin-left: 0;
+    /* Removing inconsistent margin */
 }
 
 .toc-card a:hover {

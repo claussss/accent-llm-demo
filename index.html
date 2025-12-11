@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,8 +8,11 @@
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
 
     <header>
@@ -17,34 +21,30 @@
             <p class="subtitle">Zero-Shot Accent Conversion with Prosody Control</p>
             <a href="https://github.com/claussss/ubisoft-laforge-daft-exprt" target="_blank" class="github-link">
                 View Code on GitHub
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path
+                        d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+                    </path>
+                </svg>
             </a>
         </div>
     </header>
 
     <nav class="toc container">
         <ul>
-            <li><a href="#prompt">Full Prompt</a></li>
             <li><a href="#audios">Audio Samples</a></li>
+            <li><a href="#prompt">Full Prompt</a></li>
         </ul>
     </nav>
 
     <main class="container">
-        
-        <section id="prompt" class="section">
-            <div class="section-header">
-                <h2>LLM Prompt</h2>
-                <button id="copyPromptBtn" class="btn-small">Copy</button>
-            </div>
-            <div class="prompt-container">
-                <pre><code id="promptText">loading...</code></pre>
-            </div>
-        </section>
 
         <section id="audios" class="section">
             <h2>Audio Samples</h2>
-            <p class="section-desc">Comparison of different systems on 4 test utterances. Audios are grouped by system type.</p>
-            
+            <p class="section-desc">Comparison of different systems on 4 test utterances. Audios are grouped by system
+                type.</p>
+
             <div id="transcript-display" class="transcript-box">
                 <span class="label">Transcript:</span>
                 <p id="current-transcript">Hover over an audio to see the transcript.</p>
@@ -52,6 +52,16 @@
 
             <div id="audio-grid" class="audio-grid">
                 <!-- Content will be injected by JS -->
+            </div>
+        </section>
+
+        <section id="prompt" class="section">
+            <div class="section-header">
+                <h2>LLM Prompt</h2>
+                <button id="copyPromptBtn" class="btn-small">Copy</button>
+            </div>
+            <div class="prompt-container">
+                <pre><code id="promptText">loading...</code></pre>
             </div>
         </section>
 
@@ -344,14 +354,14 @@
 
         const CONTENT_DATA = {
             "systems": [
-                { "id": "us_real", "name": "US Real", "audios": [ "assets/audios/us_real/utt_0.wav", "assets/audios/us_real/utt_1.wav", "assets/audios/us_real/utt_2.wav", "assets/audios/us_real/utt_3.wav" ] },
-                { "id": "indian_real", "name": "Indian Real", "audios": [ "assets/audios/indian_real/utt_0.wav", "assets/audios/indian_real/utt_1.wav", "assets/audios/indian_real/utt_2.wav", "assets/audios/indian_real/utt_3.wav" ] },
-                { "id": "us_tts", "name": "US TTS", "audios": [ "assets/audios/us_tts/utt_0.wav", "assets/audios/us_tts/utt_1.wav", "assets/audios/us_tts/utt_2.wav", "assets/audios/us_tts/utt_3.wav" ] },
-                { "id": "indian_tts_no_exag", "name": "Indian TTS (no exag.)", "audios": [ "assets/audios/indian_tts_no_exag/utt_0.wav", "assets/audios/indian_tts_no_exag/utt_1.wav", "assets/audios/indian_tts_no_exag/utt_2.wav", "assets/audios/indian_tts_no_exag/utt_3.wav" ] },
-                { "id": "indian_tts_exag", "name": "Indian TTS (exag.)", "audios": [ "assets/audios/indian_tts_exag/utt_0.wav", "assets/audios/indian_tts_exag/utt_1.wav", "assets/audios/indian_tts_exag/utt_2.wav", "assets/audios/indian_tts_exag/utt_3.wav" ] },
-                { "id": "llm_no_exag", "name": "LLM (no exag.)", "audios": [ "assets/audios/llm_no_exag/utt_0.wav", "assets/audios/llm_no_exag/utt_1.wav", "assets/audios/llm_no_exag/utt_2.wav", "assets/audios/llm_no_exag/utt_3.wav" ] },
-                { "id": "llm_exag", "name": "LLM (exag.)", "audios": [ "assets/audios/llm_exag/utt_0.wav", "assets/audios/llm_exag/utt_1.wav", "assets/audios/llm_exag/utt_2.wav", "assets/audios/llm_exag/utt_3.wav" ] },
-                { "id": "llm_exag_adapt", "name": "LLM (exag. + spk adapt)", "audios": [ "assets/audios/llm_exag_adapt/utt_0.wav", "assets/audios/llm_exag_adapt/utt_1.wav", "assets/audios/llm_exag_adapt/utt_2.wav", "assets/audios/llm_exag_adapt/utt_3.wav" ] }
+                { "id": "us_real", "name": "US Real", "audios": ["assets/audios/us_real/utt_0.wav", "assets/audios/us_real/utt_1.wav", "assets/audios/us_real/utt_2.wav", "assets/audios/us_real/utt_3.wav"] },
+                { "id": "indian_real", "name": "Indian Real", "audios": ["assets/audios/indian_real/utt_0.wav", "assets/audios/indian_real/utt_1.wav", "assets/audios/indian_real/utt_2.wav", "assets/audios/indian_real/utt_3.wav"] },
+                { "id": "us_tts", "name": "US TTS", "audios": ["assets/audios/us_tts/utt_0.wav", "assets/audios/us_tts/utt_1.wav", "assets/audios/us_tts/utt_2.wav", "assets/audios/us_tts/utt_3.wav"] },
+                { "id": "indian_tts_no_exag", "name": "Indian TTS (no exag.)", "audios": ["assets/audios/indian_tts_no_exag/utt_0.wav", "assets/audios/indian_tts_no_exag/utt_1.wav", "assets/audios/indian_tts_no_exag/utt_2.wav", "assets/audios/indian_tts_no_exag/utt_3.wav"] },
+                { "id": "indian_tts_exag", "name": "Indian TTS (exag.)", "audios": ["assets/audios/indian_tts_exag/utt_0.wav", "assets/audios/indian_tts_exag/utt_1.wav", "assets/audios/indian_tts_exag/utt_2.wav", "assets/audios/indian_tts_exag/utt_3.wav"] },
+                { "id": "llm_no_exag", "name": "LLM (no exag.)", "audios": ["assets/audios/llm_no_exag/utt_0.wav", "assets/audios/llm_no_exag/utt_1.wav", "assets/audios/llm_no_exag/utt_2.wav", "assets/audios/llm_no_exag/utt_3.wav"] },
+                { "id": "llm_exag", "name": "LLM (exag.)", "audios": ["assets/audios/llm_exag/utt_0.wav", "assets/audios/llm_exag/utt_1.wav", "assets/audios/llm_exag/utt_2.wav", "assets/audios/llm_exag/utt_3.wav"] },
+                { "id": "llm_exag_adapt", "name": "LLM (exag. + spk adapt)", "audios": ["assets/audios/llm_exag_adapt/utt_0.wav", "assets/audios/llm_exag_adapt/utt_1.wav", "assets/audios/llm_exag_adapt/utt_2.wav", "assets/audios/llm_exag_adapt/utt_3.wav"] }
             ],
             "transcripts": [
                 "Author of the danger trail Philip Steels etc",
@@ -368,12 +378,12 @@
             // Render Audio Grid
             const grid = document.getElementById('audio-grid');
             const transcriptDisplay = document.getElementById('current-transcript');
-            
+
             // Loop through systems to create rows
             CONTENT_DATA.systems.forEach(sys => {
                 const sysCard = document.createElement('div');
                 sysCard.className = 'system-card';
-                
+
                 const sysTitle = document.createElement('h3');
                 sysTitle.textContent = sys.name;
                 sysCard.appendChild(sysTitle);
@@ -382,7 +392,7 @@
                 audioList.className = 'audio-list';
 
                 sys.audios.forEach((audioSrc, index) => {
-                    if(!audioSrc) return;
+                    if (!audioSrc) return;
 
                     const audioWrapper = document.createElement('div');
                     audioWrapper.className = 'audio-wrapper';
@@ -390,14 +400,14 @@
                     const audio = document.createElement('audio');
                     audio.controls = true;
                     audio.src = audioSrc;
-                    
+
                     // Add hover event to show transcript
                     audioWrapper.addEventListener('mouseenter', () => {
-                       transcriptDisplay.textContent = CONTENT_DATA.transcripts[index];
-                       transcriptDisplay.style.borderColor = '#007bff';
+                        transcriptDisplay.textContent = CONTENT_DATA.transcripts[index];
+                        transcriptDisplay.style.borderColor = '#007bff';
                     });
-                     audioWrapper.addEventListener('mouseleave', () => {
-                       // Optional: reset or keep last hover
+                    audioWrapper.addEventListener('mouseleave', () => {
+                        // Optional: reset or keep last hover
                     });
 
                     audioWrapper.appendChild(audio);
@@ -420,4 +430,5 @@
         });
     </script>
 </body>
+
 </html>

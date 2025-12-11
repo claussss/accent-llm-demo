@@ -1,0 +1,82 @@
+{
+  "systems": [
+    {
+      "id": "us_real",
+      "audios": [
+        "assets/audios/us_real/utt_0.wav",
+        "assets/audios/us_real/utt_1.wav",
+        "assets/audios/us_real/utt_2.wav",
+        "assets/audios/us_real/utt_3.wav"
+      ]
+    },
+    {
+      "id": "indian_real",
+      "audios": [
+        "assets/audios/indian_real/utt_0.wav",
+        "assets/audios/indian_real/utt_1.wav",
+        "assets/audios/indian_real/utt_2.wav",
+        "assets/audios/indian_real/utt_3.wav"
+      ]
+    },
+    {
+      "id": "us_tts",
+      "audios": [
+        "assets/audios/us_tts/utt_0.wav",
+        "assets/audios/us_tts/utt_1.wav",
+        "assets/audios/us_tts/utt_2.wav",
+        "assets/audios/us_tts/utt_3.wav"
+      ]
+    },
+    {
+      "id": "indian_tts_no_exag",
+      "audios": [
+        "assets/audios/indian_tts_no_exag/utt_0.wav",
+        "assets/audios/indian_tts_no_exag/utt_1.wav",
+        "assets/audios/indian_tts_no_exag/utt_2.wav",
+        "assets/audios/indian_tts_no_exag/utt_3.wav"
+      ]
+    },
+    {
+      "id": "indian_tts_exag",
+      "audios": [
+        "assets/audios/indian_tts_exag/utt_0.wav",
+        "assets/audios/indian_tts_exag/utt_1.wav",
+        "assets/audios/indian_tts_exag/utt_2.wav",
+        "assets/audios/indian_tts_exag/utt_3.wav"
+      ]
+    },
+    {
+      "id": "llm_no_exag",
+      "audios": [
+        "assets/audios/llm_no_exag/utt_0.wav",
+        "assets/audios/llm_no_exag/utt_1.wav",
+        "assets/audios/llm_no_exag/utt_2.wav",
+        "assets/audios/llm_no_exag/utt_3.wav"
+      ]
+    },
+    {
+      "id": "llm_exag",
+      "audios": [
+        "assets/audios/llm_exag/utt_0.wav",
+        "assets/audios/llm_exag/utt_1.wav",
+        "assets/audios/llm_exag/utt_2.wav",
+        "assets/audios/llm_exag/utt_3.wav"
+      ]
+    },
+    {
+      "id": "llm_exag_adapt",
+      "audios": [
+        "assets/audios/llm_exag_adapt/utt_0.wav",
+        "assets/audios/llm_exag_adapt/utt_1.wav",
+        "assets/audios/llm_exag_adapt/utt_2.wav",
+        "assets/audios/llm_exag_adapt/utt_3.wav"
+      ]
+    }
+  ],
+  "transcripts": [
+    "Author of the danger trail Philip Steels etc",
+    "God bless 'em I hope I'll go on seeing them forever",
+    "And you always want to see it in the superlative degree",
+    "Gad your letter came just in time"
+  ]
+}

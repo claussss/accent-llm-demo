@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accent LLM Demo - ICASSP/Interspeech Style</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header>
+        <div class="container">
+            <h1>Accent LLM Demo</h1>
+            <p class="subtitle">Zero-Shot Accent Conversion with Prosody Control</p>
+            <a href="https://github.com/claussss/ubisoft-laforge-daft-exprt" target="_blank" class="github-link">
+                View Code on GitHub
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+            </a>
+        </div>
+    </header>
+
+    <nav class="toc container">
+        <ul>
+            <li><a href="#prompt">Full Prompt</a></li>
+            <li><a href="#audios">Audio Samples</a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+        
+        <section id="prompt" class="section">
+            <div class="section-header">
+                <h2>LLM Prompt</h2>
+                <button id="copyPromptBtn" class="btn-small">Copy</button>
+            </div>
+            <div class="prompt-container">
+                <pre><code id="promptText">loading...</code></pre>
+            </div>
+        </section>
+
+        <section id="audios" class="section">
+            <h2>Audio Samples</h2>
+            <p class="section-desc">Comparison of different systems on 4 test utterances. Audios are grouped by system type.</p>
+            
+            <div id="transcript-display" class="transcript-box">
+                <span class="label">Transcript:</span>
+                <p id="current-transcript">Hover over an audio to see the transcript.</p>
+            </div>
+
+            <div id="audio-grid" class="audio-grid">
+                <!-- Content will be injected by JS -->
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Accent LLM Demo.</p>
+        </div>
+    </footer>
+
+    <!-- Embedded Data to avoid CORS issues with local files -->
+    <script>
+        const PROMPT_TEXT = `
+    Developer: # Goal intensity
+    - In this setup you are NOT aiming for subtle, near-American prosody.
+    - You should generate a clearly Indian-accented, EXAGGERATED (“cartoony”) prosody, as long as:
+    - speech remains intelligible, and
+    - all numeric values stay finite and smoothly varying.
+    - When choosing between a smaller vs. larger pitch/energy change that both obey structural rules, prefer the LARGER change.
+
+    # Role and Objective
+    Transform input prosody with American accent characteristics into Indian English prosody for an acoustic TTS (Text-to-Speech) system. Use the provided American→Indian example pairs as the primary guide for transformations.
+
+    # Instructions
+    - Always process and generate Python tuples of the form: (phonemes_list, durations_list, f0_list, energy_list).
+    - Within any single tuple (input or output), all four lists must have identical length.
+    - The output tuple may have a different overall length from the input tuple, but its four lists must still be aligned and equal length.
+    - Index i across all four lists always refers to the same time step or symbol.
+    - Use only the symbol inventory and ARPAbet set described below; strictly follow all structural and transformation constraints.
+
+    ## Input/Output Format
+
+    - Tuple structure:
+    - phonemes_list: sequence of ARPAbet phoneme symbols and special symbols from this inventory:
+        * '_'  : padding (may appear in input; should not be newly introduced in normal sentences).
+        * '~'  : end-of-sequence marker (must always be the final symbol in the sequence).
+        * ' '  : space (word boundary).
+        * ARPAbet stressed phones (full inventory):
+        ['AA0', 'AA1', 'AA2', 'AE0', 'AE1', 'AE2',
+        'AH0', 'AH1', 'AH2',
+        'AO0', 'AO1', 'AO2',
+        'AW0', 'AW1', 'AW2',
+        'AY0', 'AY1', 'AY2',
+        'B', 'CH', 'D', 'DH',
+        'EH0', 'EH1', 'EH2',
+        'ER0', 'ER1', 'ER2',
+        'EY0', 'EY1', 'EY2',
+        'F', 'G', 'HH',
+        'IH0', 'IH1', 'IH2',
+        'IY0', 'IY1', 'IY2',
+        'JH', 'K', 'L', 'M', 'N', 'NG',
+        'OW0', 'OW1', 'OW2',
+        'OY0', 'OY1', 'OY2',
+        'P', 'R', 'S', 'SH', 'T', 'TH',
+        'UH0', 'UH1', 'UH2',
+        'UW0', 'UW1', 'UW2',
+        'V', 'W', 'Y', 'Z', 'ZH']
+    - durations_list: list of non-negative integers (frame counts per symbol).
+    - f0_list: list of non-negative floats (log-pitch per symbol; 0.0 = unvoiced/silence).
+    - energy_list: list of non-negative floats (energy per symbol; 0.0 = silence).
+
+    - In every INPUT and OUTPUT tuple:
+    - phonemes_list, durations_list, f0_list, and energy_list must be exactly the same length as each other.
+    - Index i refers to the same symbol/time step in all four lists.
+    - In the OUTPUT, only use symbols from the inventory above.
+
+    # Structural Rules & Special Symbols
+
+    1. List Alignment
+    - All four lists in the OUTPUT must remain exactly aligned (same length, shared indices).
+    - You may change the total sequence length compared to the input by inserting or deleting phonemes, but the four OUTPUT lists must still match in length.
+
+    2. Special Symbols
+    - '_' (pad):
+    - If '_' appears in the input, keep the SAME NUMBER of '_' symbols in the SAME ORDER in the output.
+    - Do not delete existing '_' and do not introduce any new '_'.
+    - For each '_', copy its duration, f0, and energy exactly from the corresponding '_' in the input (only the index may shift).
+    - '~' (end marker):
+    - Exactly one '~' symbol must appear in the output, and it must be the last element of phonemes_list.
+    - Do not remove it, move it away from the end, or add extra '~' symbols.
+    - Its f0 and energy must be 0.0.
+    - Its duration MUST be 0, 1, 2, or at most 3 frames. It must never be longer than any of the last three non-silence phonemes. Phrase-final lengthening should always be placed on the final vowel or sonorant, not on '~'.
+    - ' ' (space):
+    - These mark word or phrase boundaries.
+    - Do not delete or create extra ' ' symbols: keep the same number and order of spaces as in the input (their indices may shift when you insert or delete phonemes).
+    - At any space symbol, f0 and energy must be 0.0.
+    - Durations for a space symbol may be 0 or a small positive value, similar to patterns in the examples.
+    - Never invent new special symbols beyond '_', '~', ' ', and the ARPAbet phones listed above.
+
+    3. Silence / Non-speech Handling
+    - Positions with ' ', '~', or '_' represent non-speech/padding:
+    - They MUST always have f0 = 0.0 and energy = 0.0.
+    - Assigning any non-zero energy or non-zero f0 to ' ', '~', or '_' is always incorrect.
+    - Silent gaps are primarily indicated by the durations of nearby phones. You do NOT need to make spaces or '~' long to create silence.
+    - Only non-speech symbols (' ', '~', and optionally '_') may have duration 0. For any ARPAbet phoneme, the duration MUST be at least 1 frame (preferably ≥ 2). Assigning duration 0 to a phoneme is always incorrect.
+    - If a phoneme has a non-zero duration and is not ' ', '~', or '_', its energy must be > 0.0. Do not make real phones completely silent.
+    - If you change anything near the end of the sequence, re-check that the entry at '~' has duration small (0–3) and f0 = 0.0, energy = 0.0. Any other value at '~' is an error.
+
+    # Phoneme Structure & Flexibility
+
+    - You may modify the phoneme sequence to better approximate Indian English realizations, following the patterns visible in the American→Indian example pairs.
+
+    1. Insertions / Deletions / Splits / Merges
+    - Allowed operations:
+    - Split a single phoneme into two (e.g., a vowel or diphthong).
+    - Insert short epenthetic vowels (e.g., FILM → F IH1 L AH0 M).
+    - Delete or adjust /R/ in non-rhotic contexts.
+    - Apply accent-related substitutions (e.g., TH → T, DH → D, W → V).
+    - Make appropriate vowel quality and stress shifts (e.g., EH2→EH1/EH0, AH0↔IH0, AO1↔AA1) consistent with the examples.
+    - Keep the number of non-space symbols in the output reasonably close to the input:
+    - Try to keep the total count of non-space, non-punctuation symbols within about ±20% of the input count.
+    - Do not introduce long runs of entirely new phonemes that are not supported by the examples.
+    - At sentence-final position, use at most ONE trailing AH0 (schwa) before '~'. If you insert a final AH0, its duration should be modest (e.g., not more than about 1.5× the previous vowel), and you should NOT produce "AH0, AH0, '~'" or any chain of multiple schwas. The natural pattern is "... V/AH0, '~'" with a single final vowel of moderate length followed by a very short '~'.
+
+    2. Mandatory Alignment for Added/Removed Phones
+    - For every phoneme you add at index i:
+    - You MUST also add a matching duration, f0, and energy value at index i.
+    - For every phoneme you delete:
+    - You must also remove the corresponding duration, f0, and energy at that index.
+    - At no point may the four output lists differ in length.
+
+    3. Assigning Values for Inserted / Merged Phones
+    - Splitting a phoneme:
+    - If a single phoneme with duration D and some f0/energy is split into two:
+        - Choose durations that approximately sum to D (e.g., D1 + D2 ≈ D).
+        - Choose f0 and energy values for the two phones that smoothly continue the local contour:
+        - The first part similar to the left neighbor or the original early portion.
+        - The second part similar to the original late portion or right neighbor.
+    - Merging phonemes:
+    - When two phones are merged into one:
+        - Use a duration close to the sum of their durations.
+        - Use f0 and energy values that are close to a weighted average of the originals, preserving a smooth local contour.
+
+    4. Allowed Phoneme Inventory
+    - Only use:
+    - Special symbols: '_', '~', ' '
+    - ARPAbet phones listed in the inventory above.
+    - Do not invent new, out-of-inventory phone symbols.
+    - Prefer transformations that match the phoneme patterns seen in the American→Indian examples.
+
+    # Lexical Preservation per Word (VERY IMPORTANT)
+
+    - A "word" is any contiguous block of non-space, non-'_', non-'~' phonemes.
+    - For every word in the INPUT, the corresponding OUTPUT word must remain the
+    **same lexical word**, only with an Indian-accented realization.
+
+    1. Vowel (syllable) structure
+    - A vowel phone is any phone whose label ends in 0, 1, or 2 (e.g. AH0, AO1, IY2).
+    - For each word, you should normally KEEP the same number of vowel phones
+    as in the INPUT.
+    - You may delete at most one **reduced** vowel (AH0, IH0, ER0) in a word,
+    and only if:
+    - it is in a non-final, unstressed syllable, and
+    - the examples show a similar schwa-deletion pattern.
+    - You must NEVER delete:
+    - the last vowel in a word, or
+    - any vowel in the final content word of the sentence.
+    
+    2. Consonant substitutions (limited set)
+    - Within each word, you must keep the overall consonant "inventory" similar
+    to the input. You may:
+    - TH → T
+    - DH → D
+    - W → V
+    - R → R, L, or (in non-rhotic position) deletion
+    - Apart from these accent-motivated changes and optional consonant lengthening
+    or shortening, do NOT introduce completely new consonant types that were
+    not present in the word (e.g., do NOT change V into G, or insert a K that
+    never existed in the input word).
+
+    3. Final content word protection
+    - For the final content word (phones between the last ' ' and '~'):
+    - Do NOT change its lexical identity.
+    - Keep all of its vowels (no reduction in vowel count).
+    - The final vowel or syllabic consonant must remain clearly audible:
+        you may lengthen it or keep its duration, but you must not shorten it
+        below its American duration.
+    
+    # Durations (Rhythm)
+
+    - The acoustic model expects durations within a natural range, but here you may be more expressive than the American input and examples.
+
+    1. Global Constraints
+    - The sum of all non-zero durations in the output should be within roughly ±25% of the sum of durations in the American input tuple.
+    - For any ARPAbet phone (not ' ', '_', or '~'), the duration must be ≥ 1; do NOT assign duration 0 to real speech phones.
+    - Non-zero durations should mostly stay within a realistic range (a few to a few tens of frames).
+    - Avoid making non-zero durations shorter than 2 frames, unless the input already used such values.
+
+    2. Local Changes
+    - For most individual phones, a typical change range is about 0.7×–1.5× the original duration.
+    - You may:
+    - Lengthen stressed vowels and syllables that carry important f0 peaks, especially near phrase boundaries.
+    - Shorten some unstressed function words and certain consonants.
+    - For a few key syllables (e.g., phrase-final vowels or strong emphases), you may create longer holds up to about 2× the original duration, as long as the global duration constraint is still met.
+    - Do NOT try to make all syllables or phonemes the same length. Preserve strong contrast between longer and shorter segments; avoid over-smoothing durations.
+    - For word-final sequences of the form [vowel + consonant(s)] in content words (e.g., "forever", "etc"):
+    - Avoid deleting or heavily shortening the final vowel. The final vowel's duration should be at least about half of its original American duration, and should be at least as long as any single following consonant in the same word.
+    - Avoid making a single final consonant (especially fricatives F, V, S, Z, SH, ZH or liquids R, L) much longer than the preceding vowel. As a rough guideline, the final consonant's duration should usually be ≤ 1.5× the duration of the preceding vowel. Prefer patterns like "V(10) + V/sonorant(8–12) + consonant(≈5–10)", not "V(7) + consonant(20)".
+
+    3. Smoothness
+    - When inserting or splitting phones (e.g., adding a schwa), ensure the sum of durations in the local region remains similar to the original.
+    - Avoid abrupt duration jumps between neighboring symbols that are not supported by the examples.
+
+    # Pitch (f0)
+
+    - f0 will be normalized later; contour shape is more important than absolute level.
+
+    1. Overall behavior
+    - Compared to the American input, you should use a CLEARLY WIDER pitch range.
+    - Roughly speaking, expand deviations from the local mean pitch by about 1.5×–2×, especially on content words (nouns, verbs, adjectives).
+    - Avoid perfectly flat stretches over many symbols; almost every content word should have some noticeable rise or fall.
+
+    2. Local modifications
+    - It is GOOD if the output has more “sing-song” motion than both the American input and the Indian examples:
+    - higher peaks on stressed syllables,
+    - deeper dips between peaks.
+    - Between two voiced neighbors (non-zero f0), larger steps are acceptable:
+    - you may use bigger upward/downward changes than in the input, as long as they do not jump to absurd outliers.
+    - When inserting phones inside a voiced region, you may push their f0 slightly ABOVE the higher neighbor or BELOW the lower neighbor to enhance the contour.
+
+    3. Limits and smoothness
+    - Keep f0 values within a realistic band for human speech (do not produce values far outside the distribution of the examples).
+    - Avoid rapid high–low–high “zigzags” that flip on every single symbol; the contour should be smooth over a few symbols even when exaggerated.
+
+    # Energy
+
+    - Energy values control loudness and “punch”.
+
+    1. Global behavior
+    - Use STRONGER consonant–vowel contrasts than in the American input:
+    - very low energy (near 0) during stop closures,
+    - clearly higher energy on following vowels.
+    - It is acceptable and desired if energy alternations are noticeably more jagged (“staccato”) than in the input.
+
+    2. Local behavior
+    - On stressed syllables and important content words, you may boost energy roughly 1.3×–2× relative to nearby unstressed material, as long as you stay within a plausible numeric range.
+    - Between neighboring symbols you may create larger loud–soft differences than in the examples to increase rhythmic contrast (nPVI):
+    - e.g., make consonants preceding a stressed vowel significantly quieter,
+    - and vowels significantly louder.
+
+    3. Limits and smoothness
+    - Do not create isolated single-symbol spikes that are 3–4× larger than everything around them; exaggeration should span at least a short region (a syllable or a cluster), not a single frame.
+    - Keep transitions monotonic inside each rising or falling movement (no “noise-like” up–down–up within 2–3 symbols).
+
+    # General Principles
+
+    1. Use the American→Indian example pairs as your main supervision signal:
+    - They demonstrate how phonemes, durations, f0, and energy change together when converting from American to Indian English prosody.
+
+    2. When uncertain:
+    - Prefer LARGER but still smooth pitch and energy adjustments, as long as they remain within a plausible human range (no absurd outliers).
+    - Always keep contours smooth over a few symbols; exaggeration should not look like random noise.
+
+    3. Ensure the OUTPUT:
+    - Is a valid Python tuple: (phonemes_list, durations_list, f0_list, energy_list) with four equal-length lists.
+    - Is a plausible (but clearly stylized and expressive) Indian English rendering of the input.
+    - Uses durations, f0, and energy patterns that stay within a plausible human range and broadly similar numeric scale to the examples, but may be noticeably more varied, sing-song, and expressive.
+
+    # Output Verbosity
+
+    - Respond with exactly one valid Python tuple matching the required format.
+    - Do not include any explanation, comments, or extra text.
+    - Keep the tuple compact enough to fit comfortably on a single screen (e.g., ~15 lines or ≤300 tokens if needed), but always prioritize correctness and completeness of the tuple.
+
+    # Examples and Supervision
+
+    - Below are several real American→Indian example pairs from recordings.
+    - Treat them as demonstrations of the desired transformation behavior and imitate their style for both sequences and numeric values, while allowing somewhat stronger pitch and energy variation than in the examples.
+    Example 1:
+    American: {'phonemes': ['N', 'AA1', 'T', ' ', 'AE1', 'T', ' ', 'DH', 'IH1', 'S', ' ', 'P', 'ER0', 'T', 'IH1', 'K', 'Y', 'AH0', 'L', 'ER0', ' ', 'K', 'EY1', 'S', ' ', 'T', 'AA1', 'M', ' ', 'AH0', 'P', 'AA1', 'L', 'AH0', 'JH', 'AY2', 'Z', 'D', ' ', 'W', 'IH1', 'T', 'M', 'AO0', 'R', '~'], 'durations': [12, 7, 5, 0, 5, 6, 0, 3, 6, 7, 0, 7, 7, 6, 6, 7, 3, 5, 8, 4, 0, 13, 11, 9, 0, 13, 15, 14, 2, 12, 8, 7, 6, 7, 9, 12, 7, 8, 0, 4, 7, 2, 10, 4, 24, 0], 'pitch': [5.329, 5.284, 5.284, 0.0, 5.364, 5.41, 0.0, 0.0, 5.39, 0.0, 0.0, 0.0, 5.301, 0.0, 5.291, 4.949, 5.338, 5.264, 5.232, 5.151, 0.0, 5.396, 5.343, 0.0, 0.0, 5.217, 5.066, 5.06, 0.0, 5.178, 5.044, 5.125, 5.097, 5.059, 5.107, 5.098, 5.061, 0.0, 0.0, 5.308, 5.006, 4.025, 4.96, 5.072, 5.128, 0.0], 'energy': [1.713, 3.604, 3.06, 0.0, 3.089, 0.634, 0.0, 0.263, 2.586, 0.363, 0.0, 0.271, 2.56, 0.249, 2.363, 0.38, 1.009, 2.362, 2.421, 1.819, 0.0, 0.459, 2.578, 0.281, 0.0, 0.524, 2.043, 1.384, 0.01, 0.71, 0.347, 1.81, 1.931, 1.658, 0.741, 1.73, 0.664, 0.146, 0.0, 0.515, 1.717, 0.62, 1.597, 1.907, 0.853, 0.0]}
+    Indian: {'phonemes': ['N', 'AO1', 'T', ' ', 'AH0', 'T', ' ', 'D', 'IH0', 'S', ' ', 'P', 'AH0', 'T', 'IH1', 'K', 'Y', 'UH0', 'L', 'AH0', ' ', 'K', 'EY1', 'S', ' ', 'T', 'AA1', 'M', ' ', 'AH0', 'P', 'AO1', 'L', 'AH0', 'JH', 'AY1', 'Z', 'D', ' ', 'V', 'IH1', 'T', 'AH0', 'M', 'AO1', '~'], 'durations': [12, 7, 9, 0, 8, 8, 0, 6, 8, 6, 0, 9, 8, 5, 2, 7, 3, 2, 5, 7, 0, 10, 16, 20, 24, 6, 11, 7, 3, 7, 7, 3, 8, 5, 9, 10, 12, 9, 17, 9, 9, 10, 3, 4, 14, 0], 'pitch': [5.338, 5.464, 5.529, 0.0, 5.706, 5.506, 0.0, 5.315, 5.514, 0.0, 0.0, 5.416, 5.361, 5.366, 5.429, 5.263, 5.434, 5.421, 5.408, 5.366, 0.0, 5.278, 5.361, 0.0, 0.0, 5.434, 5.411, 5.486, 0.0, 5.375, 0.0, 5.298, 5.263, 5.211, 5.277, 5.391, 5.499, 0.0, 0.0, 5.264, 5.257, 4.99, 0.0, 5.134, 4.819, 0.0], 'energy': [1.166, 1.723, 0.59, 0.0, 1.95, 0.766, 0.0, 0.583, 1.269, 0.169, 0.0, 0.332, 1.388, 0.214, 1.057, 0.311, 0.56, 1.337, 1.438, 1.127, 0.0, 0.31, 1.589, 0.118, 0.093, 0.506, 1.296, 0.701, 0.116, 0.552, 0.19, 1.214, 1.135, 0.851, 0.526, 1.447, 0.388, 0.081, 0.088, 0.423, 1.117, 0.168, 0.284, 0.625, 0.341, 0.0]}
+
+    Example 2:
+    American: {'phonemes': ['F', 'R', 'ER0', ' ', 'DH', 'AH0', ' ', 'T', 'W', 'EH1', 'N', 'IY0', 'AH0', 'TH', ' ', 'T', 'AY1', 'M', ' ', 'DH', 'AE1', 'T', ' ', 'IY1', 'V', 'N', 'IH0', 'NG', ' ', 'DH', 'AH0', ' ', 'T', 'UW1', ' ', 'M', 'EH1', 'N', ' ', 'SH', 'UH1', 'K', ' ', 'HH', 'AE1', 'N', 'D', 'Z', '~'], 'durations': [13, 3, 5, 0, 4, 7, 0, 8, 6, 5, 5, 9, 4, 6, 0, 12, 13, 8, 0, 4, 10, 5, 0, 13, 5, 4, 7, 11, 0, 4, 4, 0, 12, 12, 0, 9, 11, 8, 0, 12, 5, 9, 0, 4, 22, 7, 6, 12, 0], 'pitch': [0.0, 5.38, 5.287, 0.0, 5.185, 5.206, 0.0, 0.0, 5.361, 5.318, 5.339, 5.416, 5.446, 0.0, 0.0, 5.391, 5.283, 5.273, 0.0, 5.239, 5.228, 5.181, 0.0, 5.185, 5.09, 5.127, 5.092, 5.074, 0.0, 5.063, 4.428, 0.0, 4.248, 5.255, 0.0, 5.242, 5.144, 5.112, 0.0, 5.112, 5.11, 4.867, 0.0, 0.0, 5.043, 5.023, 5.113, 0.0, 0.0], 'energy': [0.055, 1.263, 3.062, 0.0, 1.825, 2.347, 0.0, 0.294, 1.5, 3.301, 3.602, 3.696, 2.423, 0.166, 0.0, 0.62, 2.641, 3.216, 0.0, 2.488, 2.484, 1.215, 0.0, 2.135, 1.061, 2.077, 1.987, 1.9, 0.0, 1.02, 1.33, 0.0, 0.182, 2.418, 0.0, 3.506, 2.12, 1.996, 0.0, 0.648, 1.851, 0.213, 0.0, 0.278, 1.405, 1.081, 0.584, 0.091, 0.0]}
+    Indian: {'phonemes': ['F', 'AO1', 'D', ' ', 'AH0', 'T', ' ', 'T', 'W', 'EH1', 'N', 'T', 'Y', 'AH0', 'T', ' ', 'T', 'AY1', 'M', ' ', 'D', 'AH0', 'T', ' ', 'IY1', 'V', 'AH0', 'N', 'Y', 'IH0', 'N', ' ', 'D', 'AH0', ' ', 'T', 'UW1', ' ', 'M', 'EH1', 'N', ' ', 'SH', 'UH1', 'K', ' ', 'HH', 'AA1', 'N', 'D', 'Z', '~'], 'durations': [9, 6, 4, 0, 4, 6, 0, 3, 3, 5, 5, 5, 8, 5, 6, 4, 8, 15, 15, 11, 9, 8, 10, 2, 13, 7, 3, 4, 4, 5, 8, 50, 5, 9, 0, 4, 10, 0, 9, 5, 8, 0, 9, 6, 7, 0, 18, 3, 7, 6, 12, 0], 'pitch': [5.425, 5.372, 5.375, 0.0, 5.352, 0.0, 0.0, 5.476, 5.429, 5.416, 5.397, 5.403, 5.683, 5.762, 5.796, 0.0, 5.505, 5.292, 5.303, 0.0, 5.264, 5.342, 5.278, 0.0, 5.308, 5.154, 5.254, 5.256, 5.267, 5.339, 5.515, 0.0, 0.0, 5.3, 0.0, 0.0, 5.593, 0.0, 5.56, 5.46, 5.428, 0.0, 0.0, 5.428, 0.0, 0.0, 5.185, 5.118, 5.063, 5.008, 0.0, 0.0], 'energy': [0.165, 1.317, 1.558, 0.0, 1.685, 0.263, 0.0, 0.401, 1.069, 1.766, 1.872, 0.418, 1.688, 1.356, 0.202, 0.096, 0.688, 1.327, 0.799, 0.101, 0.444, 1.698, 0.174, 0.095, 0.57, 0.445, 0.859, 1.116, 1.327, 1.307, 0.734, 0.098, 0.173, 0.845, 0.0, 0.392, 1.816, 0.0, 1.732, 1.789, 1.645, 0.0, 0.37, 1.094, 0.185, 0.0, 0.431, 0.706, 0.561, 0.285, 0.095, 0.0]}
+
+    Example 3:
+    American: {'phonemes': ['L', 'AO1', 'R', 'D', ' ', 'B', 'AH1', 'T', ' ', 'AY1', 'M', ' ', 'G', 'L', 'AE1', 'D', ' ', 'T', 'IH0', ' ', 'S', 'IY1', ' ', 'Y', 'UW1', ' ', 'AH0', 'G', 'EH1', 'N', ' ', 'F', 'IH1', 'L', '~'], 'durations': [15, 13, 9, 7, 0, 5, 4, 5, 0, 8, 9, 0, 4, 6, 10, 4, 0, 5, 8, 0, 12, 9, 0, 5, 9, 0, 5, 8, 10, 9, 0, 13, 12, 24, 0], 'pitch': [5.268, 5.283, 5.364, 5.325, 0.0, 0.0, 5.277, 5.175, 0.0, 5.17, 5.168, 0.0, 0.0, 5.248, 5.239, 5.235, 0.0, 0.0, 5.237, 0.0, 5.425, 5.368, 0.0, 5.318, 5.195, 0.0, 5.096, 5.094, 5.062, 5.055, 0.0, 5.209, 5.075, 5.168, 0.0], 'energy': [1.393, 3.294, 2.81, 0.997, 0.0, 0.319, 2.857, 2.081, 0.0, 2.05, 2.336, 0.0, 0.325, 1.982, 2.425, 1.295, 0.0, 0.173, 1.337, 0.0, 0.421, 2.922, 0.0, 3.2, 2.668, 0.0, 1.976, 0.901, 1.636, 1.408, 0.0, 0.205, 1.652, 0.644, 0.0]}
+    Indian: {'phonemes': ['L', 'AO1', 'D', ' ', 'B', 'AH0', 'T', ' ', 'AY1', 'M', ' ', 'G', 'Y', 'L', 'AE1', 'D', ' ', 'T', 'UW1', ' ', 'S', 'IY1', ' ', 'Y', 'UW1', ' ', 'AH0', 'G', 'EY1', 'N', ' ', 'F', 'IH1', 'L', '~'], 'durations': [14, 16, 14, 16, 8, 6, 8, 0, 8, 12, 0, 4, 2, 5, 11, 7, 0, 3, 6, 0, 12, 6, 0, 5, 13, 0, 11, 7, 10, 14, 8, 18, 17, 4, 0], 'pitch': [5.388, 5.384, 5.08, 0.0, 5.407, 5.6, 5.754, 0.0, 5.924, 5.709, 0.0, 5.219, 5.403, 5.405, 5.359, 0.0, 0.0, 0.0, 5.476, 0.0, 0.0, 5.383, 0.0, 5.266, 5.341, 0.0, 5.182, 5.087, 5.189, 5.38, 0.0, 5.263, 5.265, 5.499, 0.0], 'energy': [1.053, 1.7, 0.399, 0.088, 0.447, 1.19, 0.721, 0.0, 1.732, 1.624, 0.0, 0.438, 0.754, 1.792, 1.72, 0.256, 0.0, 0.273, 1.196, 0.0, 0.23, 1.796, 0.0, 0.909, 1.249, 0.0, 0.729, 0.57, 0.931, 0.837, 0.091, 0.141, 1.064, 0.562, 0.0]}
+
+    Example 4:
+    American: {'phonemes': ['W', 'IH1', 'L', ' ', 'W', 'IY1', ' ', 'EH1', 'V', 'ER0', ' ', 'F', 'ER0', 'G', 'EH1', 'T', ' ', 'IH0', 'T', '~'], 'durations': [10, 7, 7, 0, 6, 11, 0, 7, 7, 9, 0, 11, 9, 10, 7, 4, 0, 10, 18, 0], 'pitch': [5.32, 5.292, 5.245, 0.0, 5.219, 5.218, 0.0, 5.206, 5.231, 5.269, 0.0, 0.0, 5.277, 5.169, 5.22, 5.087, 0.0, 4.706, 0.0, 0.0], 'energy': [0.83, 3.575, 3.126, 0.0, 2.111, 2.755, 0.0, 2.614, 1.21, 2.012, 0.0, 0.153, 2.66, 1.19, 2.826, 1.065, 0.0, 1.238, 0.078, 0.0]}
+    Indian: {'phonemes': ['V', 'IH1', 'L', ' ', 'V', 'IY1', ' ', 'EH1', 'V', 'AH0', 'R', ' ', 'F', 'AO1', 'G', 'EH1', 'T', ' ', 'IH0', 'T', '~'], 'durations': [10, 5, 4, 0, 4, 13, 0, 11, 4, 6, 3, 0, 8, 5, 10, 11, 5, 0, 7, 18, 0], 'pitch': [5.598, 5.82, 5.803, 0.0, 5.846, 5.952, 0.0, 5.485, 5.417, 5.551, 5.546, 0.0, 5.557, 5.448, 5.323, 5.274, 5.476, 0.0, 5.614, 5.694, 0.0], 'energy': [0.838, 3.444, 4.056, 0.0, 1.374, 3.158, 0.0, 1.501, 1.159, 1.959, 1.11, 0.0, 0.269, 1.543, 1.351, 1.048, 0.317, 0.0, 1.519, 0.155, 0.0]}
+
+    ### Task:
+    Input American: {'phonemes': ['AO1', 'TH', 'ER0', ' ', 'AH0', 'V', ' ', 'DH', 'AH0', ' ', 'D', 'EY1', 'N', 'JH', 'ER0', ' ', 'T', 'R', 'EY1', 'L', ' ', 'F', 'IH1', 'L', 'AH0', 'P', ' ', 'S', 'T', 'IY1', 'L', 'Z', ' ', 'EH2', 'T', 'S', 'EH1', 'T', 'ER0', 'AH0', '~'], 'durations': [18, 11, 9, 0, 6, 6, 0, 2, 5, 0, 7, 11, 6, 6, 8, 0, 11, 4, 18, 8, 0, 14, 5, 8, 5, 6, 0, 12, 7, 14, 9, 10, 0, 4, 7, 11, 7, 7, 8, 22, 0], 'pitch': [5.272, 5.383, 5.422, 0.0, 5.383, 5.331, 0.0, 5.337, 5.351, 0.0, 5.172, 5.269, 5.212, 5.135, 5.101, 0.0, 4.87, 5.136, 5.072, 5.122, 0.0, 0.0, 5.242, 5.196, 5.223, 0.0, 0.0, 0.0, 5.252, 5.146, 5.083, 4.773, 0.0, 5.114, 5.022, 5.228, 5.132, 5.04, 5.017, 4.984, 0.0], 'energy': [2.018, 0.834, 2.158, 0.0, 1.775, 1.114, 0.0, 1.23, 2.556, 0.0, 1.628, 3.106, 3.414, 1.477, 1.663, 0.0, 0.179, 1.62, 1.971, 1.108, 0.0, 0.059, 2.664, 2.559, 1.99, 0.096, 0.0, 0.137, 0.409, 2.166, 1.776, 0.352, 0.0, 1.252, 0.512, 0.512, 2.756, 1.743, 1.795, 0.845, 0.0]}
+    Output Indian:
+        `;
+
+        const CONTENT_DATA = {
+            "systems": [
+                { "id": "us_real", "name": "US Real", "audios": [ "assets/audios/us_real/utt_0.wav", "assets/audios/us_real/utt_1.wav", "assets/audios/us_real/utt_2.wav", "assets/audios/us_real/utt_3.wav" ] },
+                { "id": "indian_real", "name": "Indian Real", "audios": [ "assets/audios/indian_real/utt_0.wav", "assets/audios/indian_real/utt_1.wav", "assets/audios/indian_real/utt_2.wav", "assets/audios/indian_real/utt_3.wav" ] },
+                { "id": "us_tts", "name": "US TTS", "audios": [ "assets/audios/us_tts/utt_0.wav", "assets/audios/us_tts/utt_1.wav", "assets/audios/us_tts/utt_2.wav", "assets/audios/us_tts/utt_3.wav" ] },
+                { "id": "indian_tts_no_exag", "name": "Indian TTS (no exag.)", "audios": [ "assets/audios/indian_tts_no_exag/utt_0.wav", "assets/audios/indian_tts_no_exag/utt_1.wav", "assets/audios/indian_tts_no_exag/utt_2.wav", "assets/audios/indian_tts_no_exag/utt_3.wav" ] },
+                { "id": "indian_tts_exag", "name": "Indian TTS (exag.)", "audios": [ "assets/audios/indian_tts_exag/utt_0.wav", "assets/audios/indian_tts_exag/utt_1.wav", "assets/audios/indian_tts_exag/utt_2.wav", "assets/audios/indian_tts_exag/utt_3.wav" ] },
+                { "id": "llm_no_exag", "name": "LLM (no exag.)", "audios": [ "assets/audios/llm_no_exag/utt_0.wav", "assets/audios/llm_no_exag/utt_1.wav", "assets/audios/llm_no_exag/utt_2.wav", "assets/audios/llm_no_exag/utt_3.wav" ] },
+                { "id": "llm_exag", "name": "LLM (exag.)", "audios": [ "assets/audios/llm_exag/utt_0.wav", "assets/audios/llm_exag/utt_1.wav", "assets/audios/llm_exag/utt_2.wav", "assets/audios/llm_exag/utt_3.wav" ] },
+                { "id": "llm_exag_adapt", "name": "LLM (exag. + spk adapt)", "audios": [ "assets/audios/llm_exag_adapt/utt_0.wav", "assets/audios/llm_exag_adapt/utt_1.wav", "assets/audios/llm_exag_adapt/utt_2.wav", "assets/audios/llm_exag_adapt/utt_3.wav" ] }
+            ],
+            "transcripts": [
+                "Author of the danger trail Philip Steels etc",
+                "God bless 'em I hope I'll go on seeing them forever",
+                "And you always want to see it in the superlative degree",
+                "Gad your letter came just in time"
+            ]
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Render Prompt
+            document.getElementById('promptText').textContent = PROMPT_TEXT;
+
+            // Render Audio Grid
+            const grid = document.getElementById('audio-grid');
+            const transcriptDisplay = document.getElementById('current-transcript');
+            
+            // Loop through systems to create rows
+            CONTENT_DATA.systems.forEach(sys => {
+                const sysCard = document.createElement('div');
+                sysCard.className = 'system-card';
+                
+                const sysTitle = document.createElement('h3');
+                sysTitle.textContent = sys.name;
+                sysCard.appendChild(sysTitle);
+
+                const audioList = document.createElement('div');
+                audioList.className = 'audio-list';
+
+                sys.audios.forEach((audioSrc, index) => {
+                    if(!audioSrc) return;
+
+                    const audioWrapper = document.createElement('div');
+                    audioWrapper.className = 'audio-wrapper';
+
+                    const audio = document.createElement('audio');
+                    audio.controls = true;
+                    audio.src = audioSrc;
+                    
+                    // Add hover event to show transcript
+                    audioWrapper.addEventListener('mouseenter', () => {
+                       transcriptDisplay.textContent = CONTENT_DATA.transcripts[index];
+                       transcriptDisplay.style.borderColor = '#007bff';
+                    });
+                     audioWrapper.addEventListener('mouseleave', () => {
+                       // Optional: reset or keep last hover
+                    });
+
+                    audioWrapper.appendChild(audio);
+                    audioList.appendChild(audioWrapper);
+                });
+
+                sysCard.appendChild(audioList);
+                grid.appendChild(sysCard);
+            });
+
+            // Copy Prompt Functionality
+            document.getElementById('copyPromptBtn').addEventListener('click', () => {
+                navigator.clipboard.writeText(PROMPT_TEXT).then(() => {
+                    const btn = document.getElementById('copyPromptBtn');
+                    const originalText = btn.textContent;
+                    btn.textContent = 'Copied!';
+                    setTimeout(() => btn.textContent = originalText, 2000);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

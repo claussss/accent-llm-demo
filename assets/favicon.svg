@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Blue background container, slightly rounded -->
+  <rect x="0" y="0" width="64" height="64" rx="12" fill="#007bff"/>
+  
+  <!-- White Speech Bubble shape -->
+  <path d="M10 16 C10 10 14 10 32 10 C50 10 54 10 54 16 L54 40 C54 46 50 46 32 46 L20 46 L10 56 L10 46 C6 46 6 42 10 40 Z" fill="white"/>
+
+  <!-- Blue Waveform inside -->
+  <path d="M22 28 L22 28" stroke="#007bff" stroke-width="4" stroke-linecap="round">
+    <animate attributeName="d" values="M22 28 L22 28; M22 20 L22 36; M22 28 L22 28" dur="1.5s" repeatCount="indefinite" />
+  </path>
+  <path d="M32 28 L32 28" stroke="#007bff" stroke-width="4" stroke-linecap="round">
+    <animate attributeName="d" values="M32 28 L32 28; M32 16 L32 40; M32 28 L32 28" dur="1.5s" begin="0.1s" repeatCount="indefinite" />
+  </path>
+  <path d="M42 28 L42 28" stroke="#007bff" stroke-width="4" stroke-linecap="round">
+    <animate attributeName="d" values="M42 28 L42 28; M42 22 L42 34; M42 28 L42 28" dur="1.5s" begin="0.2s" repeatCount="indefinite" />
+  </path>
+  
+  <!-- Static fallback if animation fails: just 3 bars -->
+  <path d="M22 24 L22 32 M32 18 L32 38 M42 26 L42 30" stroke="#007bff" stroke-width="4" stroke-linecap="round" />
+</svg>

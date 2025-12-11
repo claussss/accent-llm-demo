@@ -61,29 +61,46 @@ header h1 {
 /* Navigation / TOC */
 .toc {
     background: #fff;
-    padding: 15px 0;
+    padding: 20px 0;
     border-bottom: 1px solid var(--border-color);
+    text-align: center;
 }
 
-.toc ul {
+.toc-header {
+    font-weight: 600;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.toc ol {
     list-style: none;
+    /* We can toggle this if they want actual 1. 2. or just visual */
     padding: 0;
     margin: 0;
     display: flex;
-    justify-content: center;
-    gap: 40px;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Re-adding numbers manually to have control or use standard list-style */
+.toc ol {
+    list-style-position: inside;
+}
+
+.toc li {
+    font-size: 1rem;
 }
 
 .toc a {
     text-decoration: none;
-    color: var(--text-color);
+    color: var(--primary-color);
     font-weight: 500;
-    font-size: 1rem;
-    padding: 5px 10px;
 }
 
 .toc a:hover {
-    color: var(--primary-color);
+    text-decoration: underline;
 }
 
 /* Main Content */

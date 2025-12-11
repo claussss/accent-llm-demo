@@ -60,7 +60,7 @@ header h1 {
 
 /* Navigation / TOC */
 .toc-card {
-    text-align: center;
+    text-align: left;
     /* .section class handles background, padding, shadow */
 }
 
@@ -75,8 +75,7 @@ header h1 {
     list-style-position: inside;
     padding: 0;
     margin: 0;
-    display: inline-block;
-    /* Allows list to be centered but items left-aligned relative to block if needed, or just center completely */
+    display: block;
     text-align: left;
 }
 

@@ -59,47 +59,43 @@ header h1 {
 }
 
 /* Navigation / TOC */
-.toc {
-    background: #fff;
-    padding: 20px 0;
-    border-bottom: 1px solid var(--border-color);
+.toc-card {
     text-align: center;
+    /* .section class handles background, padding, shadow */
 }
 
 .toc-header {
     font-weight: 600;
-    margin-bottom: 10px;
-    font-size: 1.1rem;
-    color: #333;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    color: #222;
 }
 
-.toc ol {
-    list-style: none;
-    /* We can toggle this if they want actual 1. 2. or just visual */
+.toc-card ol {
+    list-style-position: inside;
     padding: 0;
     margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
+    display: inline-block;
+    /* Allows list to be centered but items left-aligned relative to block if needed, or just center completely */
+    text-align: left;
 }
 
-/* Re-adding numbers manually to have control or use standard list-style */
-.toc ol {
-    list-style-position: inside;
+.toc-card li {
+    font-size: 1.05rem;
+    margin-bottom: 8px;
+    color: #555;
+    font-family: 'Inter', system-ui, sans-serif;
+    /* Explicitly ensure consistency */
 }
 
-.toc li {
-    font-size: 1rem;
-}
-
-.toc a {
+.toc-card a {
     text-decoration: none;
     color: var(--primary-color);
     font-weight: 500;
+    margin-left: 5px;
 }
 
-.toc a:hover {
+.toc-card a:hover {
     text-decoration: underline;
 }
 
@@ -211,7 +207,8 @@ pre {
 
 .system-card:hover {
     border-color: #b0c4de;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transform: none !important;
+    /* Force no movement */
 }
 
 .system-card h3 {
